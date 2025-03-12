@@ -15,5 +15,5 @@ void Neuron::add_connection(Neuron *n, double weight) {
     c.n = n;
     c.weight = weight;
     
-    connections.push_back(c);
+    con.push_back(c);
 }

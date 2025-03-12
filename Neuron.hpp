@@ -12,7 +12,8 @@ struct connection {
 class Neuron {
     public:
         double val, bias;
-        vector<connection> connections;
+        double error_signal, val_derivative;
+        vector<connection> con;
 
         Neuron();
         Neuron(double val, double bias);
