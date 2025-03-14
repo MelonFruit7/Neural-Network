@@ -4,7 +4,6 @@
 
 #define DEFAULT_NETWORK {2, 2}
 
-
 double sigmoid(double x) {
     return 1.0/(1+exp(-x));
 }
@@ -24,13 +23,13 @@ Network::Network(vector<int> NETWORK_LAYER_SIZES = DEFAULT_NETWORK) {
             for (int j = 0; j < net[i].size(); j++) {
                 net[i][j].bias = t.random_value(0.3, 0.7); //Apply random bias
                 for (int k = 0; k < NETWORK_LAYER_SIZES[i-1]; k++)
-                    net[i][j].add_connection(&net[i-1][k], t.random_value(-0.3, 0.5)); //Add back connections
+                    net[i][j].add_connection(&net[i-1][k], t.random_value(-1, 1)); //Add back connections
             }
         }
     }
 }
 
-vector<Neuron> Network::calculate(vector<double> input) {
+vector<Neuron> Network::calculate(vector<double> &input) {
     if (input.size() != INPUT_SIZE) std::__throw_invalid_argument("Wrong input size");
     for (int i = 0; i < INPUT_SIZE; i++) net[0][i] = Neuron(input[i], 1.0f);
 
@@ -50,14 +49,20 @@ vector<Neuron> Network::calculate(vector<double> input) {
     return net[NETWORK_SIZE-1]; 
 }
 
-void Network::train(vector<double> input, vector<double> target) {
+void Network::train(TrainSet &ts, int loops, int batch_size) {
+    for (int i = 0; i < loops; i++) {
+        TrainSet t = ts.extract_batch(batch_size);
+        for (int j = 0; j < batch_size; j++) train(t.get_input(j), t.get_output(j));
+    }
+}
+void Network::train(vector<double> &input, vector<double> &target) {
     if (input.size() != INPUT_SIZE || target.size() != OUTPUT_SIZE) std::__throw_invalid_argument("Wrong input/target size");
     calculate(input);
     backprop_error(target);
     update_weights(0.3);
 }
 
-void Network::backprop_error(vector<double> target) {
+void Network::backprop_error(vector<double> &target) {
     for (int neuron = 0; neuron < OUTPUT_SIZE; neuron++) {
         //Loss function for output neurons
         net[NETWORK_SIZE-1][neuron].error_signal = (net[NETWORK_SIZE-1][neuron].val - target[neuron]) * net[NETWORK_SIZE-1][neuron].val_derivative;

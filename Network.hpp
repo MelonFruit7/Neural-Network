@@ -1,6 +1,7 @@
 #pragma once
 #include "Neuron.hpp"
 #include "NetworkTools.hpp"
+#include "TrainSet.hpp"
 #include <vector>
 using std::vector;
 
@@ -14,8 +15,9 @@ class Network {
     public:
         NetworkTools t;
         Network(vector<int> NETWORK_LAYER_SIZES);
-        vector<Neuron> calculate(vector<double> input);
-        void train(vector<double> input, vector<double> target);
-        void backprop_error(vector<double> target);
+        vector<Neuron> calculate(vector<double> &input);
+        void train(TrainSet &ts, int loops, int batch_size);
+        void train(vector<double> &input, vector<double> &target);
+        void backprop_error(vector<double> &target);
         void update_weights(double learning_rate);
 };
