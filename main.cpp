@@ -82,11 +82,19 @@ int main() {
     //Training
     TrainSet s(layer_sizes[0], layer_sizes[layer_sizes.size()-1]);
     read_minst(s);
-    network.train(s, 50, 2000);
+    network.load_network();
+    network.train(s, 20, 10000);
+    network.save_network();
 
 
     //Testing
     int test_cases = 100000, passed = 0;
+    for (int i = 0; i < test_cases; i++) {
+        int test = (int)network.t.random_value(0, s.size());
+        int res = network.t.index_of_largest(network.calculate(s.get_input(test)));
+        int actual = network.t.index_of_largest(s.get_output(test));
+        if (res == actual) passed++;
+    }
     cout << "Test Cases: " << test_cases << endl;
     cout << "Passed: " << passed << "/" << test_cases << endl;
 
@@ -104,8 +112,11 @@ int main() {
 
             DrawTexturePro(texture, {0, 0, 28, 28}, {0, 0, 500, 500}, {0, 0}, 0, WHITE);
             int res = network.t.index_of_largest(network.calculate(s.get_input(test)));
+            int actual = network.t.index_of_largest(s.get_output(test));
+
             string tex = std::to_string(res);
-            DrawText(tex.c_str(), 0, 0, 48, GREEN);
+            DrawText(tex.c_str(), 0, 0, 48, res == actual ? GREEN : RED);
+            
             loops = 0;
         }
         EndDrawing();

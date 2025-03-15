@@ -20,4 +20,6 @@ class Network {
         void train(vector<double> &input, vector<double> &target);
         void backprop_error(vector<double> &target);
         void update_weights(double learning_rate);
+        void save_network();
+        void load_network();
 };

@@ -17,6 +17,11 @@ int NetworkTools::index_of_largest(vector<Neuron> ns) {
     for (int i = 1; i < ns.size(); i++) if (ns[i].val > ns[idx].val) idx = i;
     return idx;
 }
+int NetworkTools::index_of_largest(vector<double> ns) {
+    int idx = 0;
+    for (int i = 1; i < ns.size(); i++) if (ns[i] > ns[idx]) idx = i;
+    return idx;
+}
 
 vector<int> NetworkTools::random_values(int lower_bound, int upper_bound, int amount) {
     if (amount > (upper_bound-lower_bound+1)) std::__throw_invalid_argument("No valid amount");

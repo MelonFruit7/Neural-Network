@@ -21,7 +21,7 @@ Network::Network(vector<int> NETWORK_LAYER_SIZES = DEFAULT_NETWORK) {
         //Calculate random start weights
         if (i > 0) { 
             for (int j = 0; j < net[i].size(); j++) {
-                net[i][j].bias = t.random_value(0.3, 0.7); //Apply random bias
+                net[i][j].bias = t.random_value(-1, 1); //Apply random bias
                 for (int k = 0; k < NETWORK_LAYER_SIZES[i-1]; k++)
                     net[i][j].add_connection(&net[i-1][k], t.random_value(-1, 1)); //Add back connections
             }
@@ -90,5 +90,51 @@ void Network::update_weights(double learning_rate) {
             double delta = -learning_rate * net[layer][neuron].error_signal;
             net[layer][neuron].bias += delta;
         }
+    }
+}
+
+void Network::save_network() {
+    FILE *fp = fopen("network.dat", "wb");
+    if (fp != NULL) {
+        size_t sz = NETWORK_LAYER_SIZES.size();
+        fwrite(&sz, sizeof(size_t), 1, fp);
+        for (int i = 0; i < sz; i++) {
+            fwrite(&NETWORK_LAYER_SIZES[i], sizeof(int), 1, fp);
+            for (int j = 0; j < NETWORK_LAYER_SIZES[i]; j++) {
+                fwrite(&net[i][j].bias, sizeof(double), 1, fp);
+                if (i > 0) for (connection c : net[i][j].con) fwrite(&c.weight, sizeof(double), 1, fp);
+            }
+        }
+        fclose(fp);
+    }
+}
+
+void Network::load_network() {
+    FILE *fp = fopen("network.dat", "rb");
+    if (fp != NULL) {
+        size_t sz; fread(&sz, sizeof(size_t), 1, fp);
+
+        NETWORK_LAYER_SIZES.clear();
+        net.clear();
+        net = vector<vector<Neuron>>(sz);
+        for (int i = 0; i < sz; i++) {
+            int net_layer_size; fread(&net_layer_size, sizeof(int), 1, fp);
+            net[i] = vector<Neuron>(net_layer_size);
+            NETWORK_LAYER_SIZES.push_back(net_layer_size);
+            for (int j = 0; j < NETWORK_LAYER_SIZES[i]; j++) {
+                fread(&net[i][j].bias, sizeof(double), 1, fp);
+                if (i > 0) {
+                    for (int k = 0; k < NETWORK_LAYER_SIZES[i-1]; k++) {
+                        double weight; fread(&weight, sizeof(double), 1, fp);
+                        net[i][j].add_connection(&net[i-1][k], weight);
+                    }
+                }
+            }
+        }
+
+        INPUT_SIZE = NETWORK_LAYER_SIZES[0];
+        NETWORK_SIZE = NETWORK_LAYER_SIZES.size();
+        OUTPUT_SIZE = NETWORK_LAYER_SIZES[NETWORK_SIZE-1];
+        fclose(fp);
     }
 }
